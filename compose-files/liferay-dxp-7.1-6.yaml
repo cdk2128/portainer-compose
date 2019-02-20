@@ -1,0 +1,39 @@
+version: '3'
+services:
+    db:
+        image: mysql:5.7
+        ports:
+            - 3306:3306
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: lportal
+            MYSQL_USER: lr_user
+            MYSQL_PASSWORD: liferay
+        volumes:
+            - ./sql:/docker-entrypoint-initdb.d/
+            - mysql-dev-data:/var/lib/mysql
+
+    liferay:
+        image: base22/dxp-developer:7.1-6
+        environment:
+            - DB=db
+            - DB_PORT=3306
+            - XMX=1024
+            - XMS=1024
+        volumes:
+            - ./deploy:/opt/liferay/deploy
+            - ./logs/tomcat:/opt/liferay/tomcat-8.0.32/logs
+            - ./logs/liferay:/opt/liferay/logs
+        expose:
+            - 8080
+            - 8000
+            - 11311
+        ports:
+            - 80:8080
+            - 8000:8000
+            - 11311:11311
+        depends_on:
+            - db
+volumes:
+    mysql-dev-data:
+        driver: local
